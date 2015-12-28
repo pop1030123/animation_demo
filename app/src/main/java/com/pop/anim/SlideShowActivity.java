@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.SurfaceHolder;
 
 
 import com.pop.anim.turnpage.BlackSquareFadeAway;
@@ -43,8 +44,6 @@ public class SlideShowActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mTurnPageView=new TurnPageView(this);
-
         mBlackSquareFadeAway = new BlackSquareFadeAway() ;
         mBlackSquareZoomIn = new BlackSquareZoomIn() ;
         mShutterDown2Up = new ShutterDown2Up() ;
@@ -55,12 +54,15 @@ public class SlideShowActivity extends Activity {
         mTranslateRight = new TranslateRight() ;
 
 
+        mTurnPageView=new TurnPageView(this);
+        mTurnPageView.getHolder().addCallback(callBack);
         mTurnPageView.setCallback(new TurnPageView.TurnPageViewCallback() {
             @Override
             public void animFinished() {
                 mHandler.sendEmptyMessageDelayed(MSG_NEXT, 2000);
             }
         });
+
         setContentView(mTurnPageView);
 
     }
@@ -70,7 +72,6 @@ public class SlideShowActivity extends Activity {
         super.onResume();
         type = getIntent().getIntExtra("type" ,0) ;
         Log.d(TAG, "onResume:type:" + type) ;
-        mHandler.sendEmptyMessage(MSG_NEXT) ;
     }
 
     @Override
@@ -86,23 +87,50 @@ public class SlideShowActivity extends Activity {
             super.handleMessage(msg);
             switch (msg.what){
                 case MSG_NEXT:
-                    Log.d(TAG ,"msg_next---curBitmapIndex:"+curBitmapIndex);
-                    int cur = curBitmapIndex%App.mBitmaps.length ;
-                    curBitmapIndex++ ;
-                    int next = curBitmapIndex%App.mBitmaps.length ;
-                    if(curBitmapIndex>=App.mBitmaps.length){
-                        curBitmapIndex = next ;
-                    }
-                    // set animation
-                    mTurnPageView.setTurnPageStyle(getTurnPageAnimation());
-                    // set 2 bitmaps
-                    mTurnPageView.setBitmaps(new Bitmap[]{App.mBitmaps[next],App.mBitmaps[cur]});
+                    Log.d(TAG, "msg_next---curBitmapIndex:" + curBitmapIndex);
+                    prepare();
                     mTurnPageView.notifyTurnPage();
                     break ;
             }
-
         }
     } ;
+    void prepare(){
+        Log.d(TAG ,"prepare....") ;
+        int cur = curBitmapIndex%App.mBitmaps.length ;
+        curBitmapIndex++ ;
+        int next = curBitmapIndex%App.mBitmaps.length ;
+        if(curBitmapIndex>=App.mBitmaps.length){
+            curBitmapIndex = next ;
+        }
+        // set animation
+        mTurnPageView.setTurnPageStyle(getTurnPageAnimation());
+        // set 2 bitmaps
+        mTurnPageView.setBitmaps(new Bitmap[]{App.mBitmaps[next],App.mBitmaps[cur]});
+    }
+
+
+    private SurfaceHolder.Callback callBack=new SurfaceHolder.Callback() {
+
+        @Override
+        public void surfaceCreated(SurfaceHolder holder) {
+            Log.d(TAG, "surfaceCreated ------");
+            prepare();
+            mTurnPageView.start();
+        }
+
+        @Override
+        public void surfaceDestroyed(SurfaceHolder holder) {
+            Log.d(TAG ,"surfaceDestroyed ------------");
+            mTurnPageView.stop();
+        }
+
+        @Override
+        public void surfaceChanged(SurfaceHolder holder, int format, int width,
+                                   int height) {
+            Log.d(TAG, "surfaceChanged: format:" + format + "----width：" + width + "height: " + height);
+        }
+    };
+
 
     @Override
     protected void onDestroy() {

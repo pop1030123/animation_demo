@@ -2,6 +2,7 @@ package com.pop.anim.turnpage;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Rect;
@@ -59,7 +60,7 @@ public class TranslateRight implements ITurnPage {
 			try {
 					canvas=holder.lockCanvas(null);
 					canvas.setDrawFilter(pdf);
-//					canvas.drawColor(Color.BLACK);// 清除画布
+					canvas.drawColor(Color.BLACK);// 清除画布
 					canvas.drawBitmap(bitmap[0], dx, dy, null);
 					
 					canvas.save();

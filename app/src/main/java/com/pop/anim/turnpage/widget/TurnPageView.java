@@ -3,6 +3,7 @@ package com.pop.anim.turnpage.widget;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -12,6 +13,7 @@ import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
 import android.view.View;
 
+import com.pop.anim.SlideShowActivity;
 import com.pop.anim.turnpage.ITurnPage;
 
 /**
@@ -19,20 +21,20 @@ import com.pop.anim.turnpage.ITurnPage;
  * @author yanglonghui
  *
  */
-public class TurnPageView extends SurfaceView {
+public class TurnPageView extends SurfaceView implements Runnable {
 
-    private static final String TAG = "surfaceview" ;
+    private static final String TAG = SlideShowActivity.TAG;
 //    private GestureDetector mGestureDetector; // 手势
 //	private IFillingEvent mFillingListener;
 	private ITurnPage mTrunPageAnimation;
 	private boolean isPause=true;
-	private DrawThread drawThread;
 	private SurfaceHolder holder;
     private TurnPageViewCallback mCallback ;
 	private Object mObject=new Object();
 	private Bitmap[]mBitmaps;
-	
-	public TurnPageView(Context context, AttributeSet attrs, int defStyle) {
+    boolean isRunning =true;
+
+    public TurnPageView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 		init();
 	}
@@ -60,7 +62,6 @@ public class TurnPageView extends SurfaceView {
 		
 		holder=this.getHolder();
 		setZOrderOnTop(true);
-		holder.addCallback(callBack);
 		holder.setFormat(PixelFormat.TRANSPARENT);
 		setFocusableInTouchMode(true);
 //		mGestureDetector=new GestureDetector(mSimpleOnGestureListener);
@@ -82,38 +83,12 @@ public class TurnPageView extends SurfaceView {
 		this.mBitmaps=mBitmaps;
 	}
 
-	private Callback callBack=new Callback() {
-
-		@Override
-		public void surfaceCreated(SurfaceHolder holder) {
-			Log.d(TAG, "surfaceCreated ------");
-			if(null!=drawThread)
-			{
-				drawThread.isRunning=false;
-			}
-			drawThread=new DrawThread();
-			drawThread.start();
-		}
-
-        @Override
-        public void surfaceDestroyed(SurfaceHolder holder) {
-            Log.d(TAG ,"surfaceDestroyed ------------");
-            drawThread.isRunning=false;
-        }
-		
-		@Override
-		public void surfaceChanged(SurfaceHolder holder, int format, int width,
-				int height) {
-			Log.d(TAG ,"surfaceChanged: format:"+format+ "----width："+width+"height: "+height);
-		}
-	};
-	
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 //		mGestureDetector.onTouchEvent(event); //通知手势识别方法
 		return false;
 	}
-	
+
 
 //	private SimpleOnGestureListener mSimpleOnGestureListener=new SimpleOnGestureListener()
 //	{
@@ -203,59 +178,66 @@ public class TurnPageView extends SurfaceView {
 			mObject.notifyAll();
 		}
 	}
+    public void stop(){
+        isRunning = false ;
+    }
+    public void start(){
+        Thread thread = new Thread(this) ;
+        thread.start();
+    }
 	
-	private class DrawThread extends Thread
+	private void startPlay()
 	{
-		private boolean isRunning =true;
-		
-		@Override
-		public void run() 
-		{
-			try {
-                Log.d(TAG ,"drawThread:--isRunning:"+isRunning+"--isPause:"+isPause+"--anim:"+mTrunPageAnimation+"--mBitmaps:"+mBitmaps);
-					while(isRunning)
-					{
-						if(!isPause)
-						{
-							if(null!=mTrunPageAnimation&&null!=mBitmaps)
-							{
-								clearDraw();
-								
-								mTrunPageAnimation.onCreate();
-								mTrunPageAnimation.onTurnPageDraw(holder,mBitmaps,getWidth(),getHeight());
-								mTrunPageAnimation.onDestory();
-								mTrunPageAnimation=null;
+        try {
+            Log.d(TAG ,"drawThread:--isRunning:"+isRunning+"--isPause:"+isPause+"--anim:"+mTrunPageAnimation+"--mBitmaps:"+mBitmaps);
+                while(isRunning)
+                {
+                    if(!isPause)
+                    {
+                        if(null!=mTrunPageAnimation&&null!=mBitmaps)
+                        {
+                            clearDraw();
 
-                                if(mCallback!=null){
-                                    mCallback.animFinished();
-                                }
-                                synchronized (mObject) {
-                                    mObject.wait();
-								}
-							}
-							else
-							{
-								Thread.sleep(50);
-								break;
-							}
-						}
-						else
-						{
-							Thread.sleep(500);
-							break;
-						}
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-		}
-	}
-	
+                            mTrunPageAnimation.onCreate();
+                            mTrunPageAnimation.onTurnPageDraw(holder,mBitmaps,getWidth(),getHeight());
+                            mTrunPageAnimation.onDestory();
+                            mTrunPageAnimation=null;
+
+                            if(mCallback!=null){
+                                mCallback.animFinished();
+                            }
+                            synchronized (mObject) {
+                                mObject.wait();
+                            }
+                        }
+                        else
+                        {
+                            Thread.sleep(50);
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        Thread.sleep(500);
+                        break;
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.d(TAG ,"Exception:"+e.toString()) ;
+            }
+    }
+
 	public void clearDraw() {  
 		 Canvas canvas = holder.lockCanvas(null);
-//		 canvas.drawColor(Color.BLACK);// 清除画布
+		 canvas.drawColor(Color.BLACK);// 清除画布
 		 holder.unlockCanvasAndPost(canvas);
    }
+
+    @Override
+    public void run() {
+        startPlay();
+    }
 
 
     public interface TurnPageViewCallback {

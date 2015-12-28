@@ -81,7 +81,7 @@ public class BlackSquareFadeAway implements ITurnPage {
 					canvas=holder.lockCanvas(null);
 					
 					canvas.setDrawFilter(pdf);
-//					canvas.drawColor(Color.BLACK);// 清除画布
+					canvas.drawColor(Color.BLACK);// 清除画布
 					
 					if(!isRunning)
 					{
