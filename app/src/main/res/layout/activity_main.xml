@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/black_square_fade_away"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="black_square_fade_away"/>
+
+    <Button
+        android:id="@+id/black_square_zoom_in"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="black_square_zoom_in"/>
+
+    <Button
+        android:id="@+id/shutter_down_2_up"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="shutter_down_2_up"/>
+
+    <Button
+        android:id="@+id/shutter_left_2_right"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="shutter_left_2_right"/>
+
+    <Button
+        android:id="@+id/shutter_right_2_left"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="shutter_right_2_left"/>
+
+    <Button
+        android:id="@+id/shutter_up_2_down"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="shutter_up_2_down"/>
+
+    <Button
+        android:id="@+id/translate_left"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="translate_left"/>
+
+    <Button
+        android:id="@+id/translate_right"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="translate_right"/>
+
+
+</LinearLayout>
